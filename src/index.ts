@@ -46,7 +46,7 @@ setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.p
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zip, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.tar, eventRegex.commandsRegexNoName.tar, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -55,7 +55,7 @@ setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zi
 });
 
 
-setEventCallback(eventRegex.commandsRegex.darpan, eventRegex.commandsRegexNoName.darpan, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.drive, eventRegex.commandsRegexNoName.drive, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -95,7 +95,7 @@ function mirror(msg: TelegramBot.Message, match: RegExpExecArray, isTar?: boolea
   }
 }
 
-setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName.sthiti, (msg) => {
+setEventCallback(eventRegex.commandsRegex.see, eventRegex.commandsRegexNoName.see, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -103,7 +103,7 @@ setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.suchi, eventRegex.commandsRegexNoName.suchi, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.files, eventRegex.commandsRegexNoName.files, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -127,7 +127,7 @@ setEventCallback(eventRegex.commandsRegex.folder, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.kill, (msg) => {
+setEventCallback(eventRegex.commandsRegex.stop, eventRegex.commandsRegexNoName.stop, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg);
   if (msg.reply_to_message) {
     var dlDetails = dlManager.getDownloadByMsgId(msg.reply_to_message);
@@ -155,7 +155,7 @@ setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.k
 });
 
 
-setEventCallback(eventRegex.commandsRegex.killall, eventRegex.commandsRegexNoName.killall, (msg) => {
+setEventCallback(eventRegex.commandsRegex.stopall, eventRegex.commandsRegexNoName.stopall, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg, true);
   if (authorizedCode === 0) {
     // One of SUDO_USERS. Cancel all downloads
@@ -230,7 +230,7 @@ function cancelMirror(dlDetails: details.DlVars, cancelMsg?: TelegramBot.Message
     }
     return false;
   } else {
-    ariaTools.killDownload(dlDetails.gid, () => {
+    ariaTools.stopDownload(dlDetails.gid, () => {
       // Not sending a message here, because a cancel will fire
       // the onDownloadStop notification, which will notify the
       // person who started the download
@@ -569,7 +569,7 @@ function driveUploadCompleteCallback(err: string, gid: string, url: string, file
   if (err) {
     var message = err;
     console.error(`${gid}: Failed to upload - ${filePath}: ${message}`);
-    finalMessage = `Failed to upload <code>${fileName}</code> to Drive. ${message}`;
+    finalMessage = `Failed to upload <code>${fileName}</code> to Drive.${message}`;
     cleanupDownload(gid, finalMessage);
   } else {
     console.log(`${gid}: Uploaded `);

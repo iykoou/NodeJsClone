@@ -19,11 +19,10 @@ export function archive(srcPath: string, destName: string, callback: (err: strin
     [targetDirName]
   );
 
-  writeStream.on('error', (err: Error) => callback(err.message, size));
+  stream.on('error', (err: Error) => callback(err.message, size));
   stream.on('data', (chunk:any) => {
     size += chunk.length;
   });
 
   stream.pipe(writeStream);
 }
-

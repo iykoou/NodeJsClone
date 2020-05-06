@@ -70,6 +70,7 @@ export function getSharableLink(fileId: string, isFolder: boolean,
   } else {
     callback(null, utils.getFileLink(fileId, isFolder), isFolder);
   }
+}
 
 async function createPermissions(drive: drive_v3.Drive, fileId: string): Promise<any> {
   if (constants.DRIVE_FILE_PRIVATE && constants.DRIVE_FILE_PRIVATE.ENABLED) {

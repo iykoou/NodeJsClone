@@ -46,7 +46,7 @@ setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.p
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.tar, eventRegex.commandsRegexNoName.tar, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zip, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -55,7 +55,7 @@ setEventCallback(eventRegex.commandsRegex.tar, eventRegex.commandsRegexNoName.ta
 });
 
 
-setEventCallback(eventRegex.commandsRegex.drive, eventRegex.commandsRegexNoName.drive, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.darpan, eventRegex.commandsRegexNoName.darpan, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -95,7 +95,7 @@ function mirror(msg: TelegramBot.Message, match: RegExpExecArray, isTar?: boolea
   }
 }
 
-setEventCallback(eventRegex.commandsRegex.see, eventRegex.commandsRegexNoName.see, (msg) => {
+setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName.sthiti, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -103,7 +103,7 @@ setEventCallback(eventRegex.commandsRegex.see, eventRegex.commandsRegexNoName.se
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.files, eventRegex.commandsRegexNoName.files, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.suchi, eventRegex.commandsRegexNoName.suchi, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -127,7 +127,7 @@ setEventCallback(eventRegex.commandsRegex.folder, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.stop, eventRegex.commandsRegexNoName.stop, (msg) => {
+setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.kill, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg);
   if (msg.reply_to_message) {
     var dlDetails = dlManager.getDownloadByMsgId(msg.reply_to_message);
@@ -155,7 +155,7 @@ setEventCallback(eventRegex.commandsRegex.stop, eventRegex.commandsRegexNoName.s
 });
 
 
-setEventCallback(eventRegex.commandsRegex.stopall, eventRegex.commandsRegexNoName.stopall, (msg) => {
+setEventCallback(eventRegex.commandsRegex.killall, eventRegex.commandsRegexNoName.killall, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg, true);
   if (authorizedCode === 0) {
     // One of SUDO_USERS. Cancel all downloads

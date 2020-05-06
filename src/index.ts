@@ -9,7 +9,6 @@ import driveList = require('./drive/drive-list.js');
 import driveUtils = require('./drive/drive-utils.js');
 import details = require('./dl_model/detail');
 import filenameUtils = require('./download_tools/filename-utils');
-import ping=require('./ping/ping');
 import { EventRegex } from './bot_utils/event_regex';
 import { exec } from 'child_process';
 
@@ -18,35 +17,30 @@ const bot = new TelegramBot(constants.TOKEN, { polling: true });
 var websocketOpened = false;
 var statusInterval: NodeJS.Timeout;
 var dlManager = dlm.DlManager.getInstance();
-var hosts = ['https://api.telegram.org'];
+
 initAria2();
 
+bot.on("polling_error", msg => console.error(msg.message));
+
+function setEventCallback(regexp: RegExp, regexpNoName: RegExp,
+  callback: ((msg: TelegramBot.Message, match?: RegExpExecArray) => void)): void {
+  bot.onText(regexpNoName, (msg, match) => {
+    // Return if the command didn't have the bot name for non PMs ("Bot name" could be blank depending on config)
+    if (msg.chat.type !== 'private' && !match[0].match(regexp))
+      return;
+    callback(msg, match);
+  });
+}
+
 setEventCallback(eventRegex.commandsRegex.start, eventRegex.commandsRegexNoName.start, (msg) => {
-   if (msgTools.isAuthorized(msg) < 0) {
+  if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
     msgTools.sendMessage(bot, msg, 'You should know the commands already. Happy mirroring.', -1);
   }
 });
 
-/**
- * Ping with telegram API
- */
-setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.ping, (msg) => {
-  if (msgTools.isAuthorized(msg) < 0) {
-    msgTools.sendUnauthorizedMessage(bot, msg);
-  }
-  else {
-    ping(hosts).then(function (delta: any) {
-        msgTools.sendMessage(bot, msg, 'Ping time was ' + String(delta) + ' ms.');
-        console.log('Starting ping test. Ping time was ' + String(delta) + ' ms');
-    }).catch(function (err: any) {
-        console.error('Could not ping remote URL', err);
-    });
-  }
-});
-
-setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zip, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.mirrorTar, eventRegex.commandsRegexNoName.mirrorTar, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -54,8 +48,7 @@ setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zi
   }
 });
 
-
-setEventCallback(eventRegex.commandsRegex.darpan, eventRegex.commandsRegexNoName.darpan, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.mirror, eventRegex.commandsRegexNoName.mirror, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -95,7 +88,7 @@ function mirror(msg: TelegramBot.Message, match: RegExpExecArray, isTar?: boolea
   }
 }
 
-setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName.sthiti, (msg) => {
+setEventCallback(eventRegex.commandsRegex.mirrorStatus, eventRegex.commandsRegexNoName.mirrorStatus, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -103,7 +96,7 @@ setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.suchi, eventRegex.commandsRegexNoName.suchi, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.list, eventRegex.commandsRegexNoName.list, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -117,7 +110,7 @@ setEventCallback(eventRegex.commandsRegex.suchi, eventRegex.commandsRegexNoName.
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.folder, eventRegex.commandsRegexNoName.folder, (msg) => {
+setEventCallback(eventRegex.commandsRegex.getFolder, eventRegex.commandsRegexNoName.getFolder, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -127,7 +120,7 @@ setEventCallback(eventRegex.commandsRegex.folder, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.kill, (msg) => {
+setEventCallback(eventRegex.commandsRegex.cancelMirror, eventRegex.commandsRegexNoName.cancelMirror, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg);
   if (msg.reply_to_message) {
     var dlDetails = dlManager.getDownloadByMsgId(msg.reply_to_message);
@@ -154,8 +147,7 @@ setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.k
   }
 });
 
-
-setEventCallback(eventRegex.commandsRegex.killall, eventRegex.commandsRegexNoName.killall, (msg) => {
+setEventCallback(eventRegex.commandsRegex.cancelAll, eventRegex.commandsRegexNoName.cancelAll, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg, true);
   if (authorizedCode === 0) {
     // One of SUDO_USERS. Cancel all downloads
@@ -565,11 +557,12 @@ function initAria2(): void {
 
 function driveUploadCompleteCallback(err: string, gid: string, url: string, filePath: string,
   fileName: string, fileSize: number, isFolder: boolean): void {
+
   var finalMessage;
   if (err) {
     var message = err;
     console.error(`${gid}: Failed to upload - ${filePath}: ${message}`);
-    finalMessage = `Failed to upload <code>${fileName}</code> to Drive.${message}`;
+    finalMessage = `Failed to upload <code>${fileName}</code> to Drive. ${message}`;
     cleanupDownload(gid, finalMessage);
   } else {
     console.log(`${gid}: Uploaded `);

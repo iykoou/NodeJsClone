@@ -21,18 +21,6 @@ var dlManager = dlm.DlManager.getInstance();
 var hosts = ['https://api.telegram.org'];
 initAria2();
 
-bot.on("polling_error", msg => console.error(msg.message));
-
-function setEventCallback(regexp: RegExp, regexpNoName: RegExp,
-  callback: ((msg: TelegramBot.Message, match?: RegExpExecArray) => void)): void {
-  bot.onText(regexpNoName, (msg, match) => {
-    // Return if the command didn't have the bot name for non PMs ("Bot name" could be blank depending on config)
-    if (msg.chat.type !== 'private' && !match[0].match(regexp))
-      return;
-    callback(msg, match);
-  });
-}
-
 setEventCallback(eventRegex.commandsRegex.start, eventRegex.commandsRegexNoName.start, (msg) => {
    if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
@@ -58,7 +46,7 @@ setEventCallback(eventRegex.commandsRegex.ping, eventRegex.commandsRegexNoName.p
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.tar, eventRegex.commandsRegexNoName.tar, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.zip, eventRegex.commandsRegexNoName.zip, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -67,7 +55,7 @@ setEventCallback(eventRegex.commandsRegex.tar, eventRegex.commandsRegexNoName.ta
 });
 
 
-setEventCallback(eventRegex.commandsRegex.drive, eventRegex.commandsRegexNoName.drive, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.darpan, eventRegex.commandsRegexNoName.darpan, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -107,7 +95,7 @@ function mirror(msg: TelegramBot.Message, match: RegExpExecArray, isTar?: boolea
   }
 }
 
-setEventCallback(eventRegex.commandsRegex.see, eventRegex.commandsRegexNoName.see, (msg) => {
+setEventCallback(eventRegex.commandsRegex.sthiti, eventRegex.commandsRegexNoName.sthiti, (msg) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -115,7 +103,7 @@ setEventCallback(eventRegex.commandsRegex.see, eventRegex.commandsRegexNoName.se
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.files, eventRegex.commandsRegexNoName.files, (msg, match) => {
+setEventCallback(eventRegex.commandsRegex.suchi, eventRegex.commandsRegexNoName.suchi, (msg, match) => {
   if (msgTools.isAuthorized(msg) < 0) {
     msgTools.sendUnauthorizedMessage(bot, msg);
   } else {
@@ -139,7 +127,7 @@ setEventCallback(eventRegex.commandsRegex.folder, eventRegex.commandsRegexNoName
   }
 });
 
-setEventCallback(eventRegex.commandsRegex.stop, eventRegex.commandsRegexNoName.stop, (msg) => {
+setEventCallback(eventRegex.commandsRegex.kill, eventRegex.commandsRegexNoName.kill, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg);
   if (msg.reply_to_message) {
     var dlDetails = dlManager.getDownloadByMsgId(msg.reply_to_message);
@@ -167,7 +155,7 @@ setEventCallback(eventRegex.commandsRegex.stop, eventRegex.commandsRegexNoName.s
 });
 
 
-setEventCallback(eventRegex.commandsRegex.stopall, eventRegex.commandsRegexNoName.stopall, (msg) => {
+setEventCallback(eventRegex.commandsRegex.killall, eventRegex.commandsRegexNoName.killall, (msg) => {
   var authorizedCode = msgTools.isAuthorized(msg, true);
   if (authorizedCode === 0) {
     // One of SUDO_USERS. Cancel all downloads
@@ -242,7 +230,7 @@ function cancelMirror(dlDetails: details.DlVars, cancelMsg?: TelegramBot.Message
     }
     return false;
   } else {
-    ariaTools.stopDownload(dlDetails.gid, () => {
+    ariaTools.killDownload(dlDetails.gid, () => {
       // Not sending a message here, because a cancel will fire
       // the onDownloadStop notification, which will notify the
       // person who started the download
@@ -575,12 +563,13 @@ function initAria2(): void {
 }
 
 
-function driveUploadCompleteCallback(err: string, gid: string, url: string, filePath: string, fileName: string, fileSize: number): void {
+function driveUploadCompleteCallback(err: string, gid: string, url: string, filePath: string,
+  fileName: string, fileSize: number, isFolder: boolean): void {
   var finalMessage;
   if (err) {
     var message = err;
     console.error(`${gid}: Failed to upload - ${filePath}: ${message}`);
-    finalMessage = `Failed to upload <code>${fileName}</code> to Drive.${message}`;
+    finalMessage = `Failed to upload <code>${fileName}</code> to Drive. ${message}`;
     cleanupDownload(gid, finalMessage);
   } else {
     console.log(`${gid}: Uploaded `);
@@ -589,6 +578,9 @@ function driveUploadCompleteCallback(err: string, gid: string, url: string, file
       finalMessage = `<a href='${url}'>${fileName}</a> (${fileSizeStr})`;
     } else {
       finalMessage = `<a href='${url}'>${fileName}</a>`;
+    }
+    if (constants.IS_TEAM_DRIVE && isFolder) {
+      finalMessage += '\n\n<i>Folders in Shared Drives can only be shared with members of the drive. Mirror as an archive if you need public links.</i>';
     }
     cleanupDownload(gid, finalMessage, url);
   }
